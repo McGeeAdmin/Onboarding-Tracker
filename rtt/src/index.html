@@ -159,13 +159,27 @@ th{background:var(--soft);font-weight:700;position:sticky;top:0}
 <script>
 /* ---------- API ---------- */
 async function api(path, opts = {}) {
-  const r = await fetch('/api/' + path, {
-    method: opts.method || 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    body: opts.body ? JSON.stringify(opts.body) : undefined
-  });
-  if (r.status === 401) { location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(location.pathname); throw new Error('Signing you in…'); }
+  let r;
+  try {
+    r = await fetch('/api/' + path, {
+      method: opts.method || 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    });
+  } catch (e) { throw new Error('Can’t reach the server. Check your connection and try again.'); }
+  if (r.status === 401) {
+    // Sign in once; if the API still says 401 right after signing in, stop and explain instead of looping.
+    let tried = false; try { tried = sessionStorage.getItem('rtt-login') === '1'; sessionStorage.setItem('rtt-login', '1'); } catch (e) {}
+    if (!tried) { location.href = '/.auth/login/aad?post_login_redirect_uri=' + encodeURIComponent(location.pathname); throw new Error('Signing you in…'); }
+    throw new Error('You’re signed in, but the app’s server didn’t receive your sign-in. A supervisor should check that the Function App is linked under Static Web App → Settings → APIs.');
+  }
+  try { sessionStorage.removeItem('rtt-login'); } catch (e) {}
   const text = await r.text();
+  const isJson = (r.headers.get('content-type') || '').includes('application/json');
+  if (!isJson) {
+    if (r.status === 404 || r.ok) throw new Error('The app’s server isn’t connected yet (it answered /api/' + path.split('?')[0] + ' with a web page instead of data). Check that the Function App has code deployed and is linked under Static Web App → Settings → APIs.');
+    throw new Error('The server returned an error (' + r.status + '). Try again in a minute.');
+  }
   let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) {}
   if (!r.ok) throw new Error((data && data.error) || 'The server returned an error (' + r.status + '). Try again.');
   return data;
