@@ -3,9 +3,9 @@
     "identityProviders": {
       "azureActiveDirectory": {
         "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/39d31340-21af-437e-948c-37e8a8fa4884/v2.0",
-          "clientIdSettingName": "AZURE_CLIENT_ID",
-          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
+          "openIdIssuer": "https://login.microsoftonline.com/YOUR-TENANT-ID/v2.0",
+          "clientIdSettingName": "AAD_CLIENT_ID",
+          "clientSecretSettingName": "AAD_CLIENT_SECRET"
         }
       }
     }
@@ -20,6 +20,5 @@
     "401": { "redirect": "/.auth/login/aad?post_login_redirect_uri=.referrer", "statusCode": 302 }
   },
   "navigationFallback": { "rewrite": "/index.html" },
-  "platform": { "apiRuntime": "node:20" },
   "globalHeaders": { "Cache-Control": "no-cache" }
 }

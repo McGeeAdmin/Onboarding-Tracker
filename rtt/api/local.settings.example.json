@@ -2,7 +2,9 @@
   "IsEncrypted": false,
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "SQL_CONNECTION_STRING": "Server=tcp:YOUR-SERVER.database.windows.net,1433;Database=ramptracker;User Id=YOUR-USER;Password=YOUR-PASSWORD;Encrypt=true",
+    "AzureWebJobsStorage": "",
+    "SQL_SERVER": "mcg-sql-01.database.windows.net",
+    "SQL_DATABASE": "onboarding",
     "ADMIN_EMAILS": "supervisor1@yourcompany.com,supervisor2@yourcompany.com"
   }
 }

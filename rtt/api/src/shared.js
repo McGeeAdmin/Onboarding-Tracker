@@ -1,9 +1,19 @@
 const sql = require('mssql');
 
+// Signs in to Azure SQL with Microsoft Entra ID, no password.
+// In Azure it uses the Function App's managed identity; on a developer's computer it uses their `az login`.
+const dbConfig = {
+  server: process.env.SQL_SERVER,          // e.g. mcg-sql-01.database.windows.net
+  database: process.env.SQL_DATABASE,      // e.g. onboarding
+  authentication: { type: 'azure-active-directory-default', options: {} },
+  options: { encrypt: true },
+  pool: { max: 10, min: 0, idleTimeoutMillis: 30000 }
+};
+
 let poolPromise = null;
 function db() {
   if (!poolPromise) {
-    poolPromise = new sql.ConnectionPool(process.env.SQL_CONNECTION_STRING)
+    poolPromise = new sql.ConnectionPool(dbConfig)
       .connect()
       .catch(err => { poolPromise = null; throw err; });
   }
